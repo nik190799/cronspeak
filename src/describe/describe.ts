@@ -104,7 +104,9 @@ function describeDaysOfMonth(field: CronField): string {
 
 function describeDaysOfWeek(field: CronField): string {
   const name = (v: number): string => DAY_NAMES[v % 7] as string;
-  return `on ${joinList(field.parts.map((part) => describePart(part, 'day of the week', name, 'day')))}`;
+  // 0 and 7 both mean Sunday, so drop repeated phrases (e.g. `0,7` or `SUN,7`).
+  const phrases = field.parts.map((part) => describePart(part, 'day of the week', name, 'day'));
+  return `on ${joinList([...new Set(phrases)])}`;
 }
 
 function describeMonths(field: CronField): string {
