@@ -1,0 +1,14 @@
+{
+  "issue": 1,
+  "run_id": "37176651354",
+  "run_attempt": 1,
+  "outcome": "success",
+  "dod": "skipped",
+  "total_cost_usd": 0.2300816,
+  "booked_usd": 0.2300816,
+  "cost_source": "reported",
+  "num_turns": 12,
+  "per_run_cap_usd": 2.0,
+  "recorded_at": "2026-10-04T04:20:42Z",
+  "stage": "spec"
+}
