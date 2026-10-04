@@ -30,6 +30,21 @@ group('describe', () => {
     expect(describe(expr)).toBe(expected);
   });
 
+  it.each([
+    ['1,5-10 9 * * *', 'At minutes 1 and 5 through 10 past hour 9'],
+    ['1,5-10 * * * *', 'At minutes 1 and 5 through 10 past every hour'],
+    ['10-20,45 9 * * *', 'At minutes 10 through 20 and 45 past hour 9'],
+    ['0 1,5-10 * * *', 'At minute 0 past hours 1 and 5 through 10'],
+    ['0 1,5-10,22 * * *', 'At minute 0 past hours 1, 5 through 10 and 22'],
+    ['0 0 1,5-10 * *', 'At 00:00 on days 1 and 5 through 10 of the month'],
+    ['0 0 1-3,10-12,20 * *', 'At 00:00 on days 1 through 3, 10 through 12 and 20 of the month'],
+    // Out of scope: stepped ranges and wildcard items keep the per-item wording.
+    ['1,5-10/2 9 * * *', 'At minute 1 and every 2 minutes from minute 5 through 10 past hour 9'],
+    ['0 0 1-5,10-15 * *', 'At 00:00 on days 1 through 5 and days 10 through 15 of the month'],
+  ])('describes the mixed list "%s"', (expr, expected) => {
+    expect(describe(expr)).toBe(expected);
+  });
+
   it('uses "or" when both day-of-month and day-of-week are restricted', () => {
     expect(describe('0 9 13 * 5')).toBe('At 09:00 on day 13 of the month or on Friday');
   });
