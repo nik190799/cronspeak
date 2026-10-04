@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `describe(expr)` words minute, hour and day-of-month lists that mix single
+  values and plain ranges as one phrase, e.g. `1,5-10 9 * * *` now reads
+  "At minutes 1 and 5 through 10 past hour 9".
+
 ### Added
 
 - Day-of-week ranges may wrap through the end of the week: `FRI-MON` is
