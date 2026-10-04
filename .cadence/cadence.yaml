@@ -1,0 +1,42 @@
+# Cadence recipe — TypeScript / Node (cronspeak)
+# Gate commands mirror .github/workflows/ci.yml, one command per entry.
+# scripts/verify.sh runs format, lint, the boundary check, then test.
+
+commands:
+  format:
+    - "npm run format:check"
+  lint:
+    - "npm run lint"
+    - "npm run typecheck"
+  test:
+    - "npm test"
+
+# Layering: core <- describe, schedule <- cli. src/index.ts is the public
+# barrel and may re-export any library layer.
+# "Only cli touches process/console" is not an import, so it cannot be a
+# boundary rule: console is enforced by ESLint's no-console (off only in
+# src/cli/**); process is enforced by review (docs/PATTERNS.md §1).
+boundaries:
+  - where: "src/core/**"
+    forbidden:
+      - "src/describe/**"
+      - "src/schedule/**"
+      - "src/cli/**"
+    reason: "core is the leaf layer; it imports nothing from describe, schedule or cli"
+
+  - where: "src/describe/**"
+    forbidden:
+      - "src/schedule/**"
+      - "src/cli/**"
+    reason: "describe may import only core; not schedule (sibling) or cli"
+
+  - where: "src/schedule/**"
+    forbidden:
+      - "src/describe/**"
+      - "src/cli/**"
+    reason: "schedule may import only core; not describe (sibling) or cli"
+
+  - where: "src/index.ts"
+    forbidden:
+      - "src/cli/**"
+    reason: "the library entry point must not pull in the CLI (process/console)"

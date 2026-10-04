@@ -1,0 +1,8 @@
+# Cadence factory stack profile. Fills the five runtime setup slots of
+# .github/workflows/cadence-factory.yml. Edit this file and render again;
+# never hand-edit the rendered workflow. Mirrors .github/workflows/ci.yml.
+schema: 1
+node:
+  version_file: .nvmrc
+  dirs: ["."]
+  package_manager: npm

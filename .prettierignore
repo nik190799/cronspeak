@@ -3,3 +3,11 @@ coverage/
 node_modules/
 package-lock.json
 tests/fixtures/retro/
+
+# Cadence factory files: generated, restored from main before every gate,
+# or rewritten by the retro PR. Not hand-formatted.
+.cadence/
+docs/
+standards/
+CLAUDE.md
+.github/workflows/cadence-factory.yml
