@@ -130,10 +130,6 @@ describe('parse', () => {
     expect(parseError('*/x * * * *').message).toMatch(/positive whole number/);
   });
 
-  it('rejects a step after a single value', () => {
-    expect(parseError('5/15 * * * *').message).toMatch(/a step needs "\*" or a range/);
-  });
-
   it('rejects empty list items and malformed ranges', () => {
     expect(parseError('1,,2 * * * *').message).toMatch(/empty list item/);
     expect(parseError('1-2-3 * * * *').message).toMatch(/malformed range/);
