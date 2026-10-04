@@ -45,7 +45,7 @@ function describeTime(minute: CronField, hour: CronField): string {
 
   const minutePhrase = capitalize(describeMinutes(minute));
   if (isEvery(hour)) {
-    return minutes ? `${minutePhrase} past every hour` : minutePhrase;
+    return minutes || mixedItems(minute) ? `${minutePhrase} past every hour` : minutePhrase;
   }
   return `${minutePhrase} past ${describeHours(hour)}`;
 }
@@ -54,6 +54,10 @@ function describeMinutes(field: CronField): string {
   const values = singleValues(field);
   if (values) {
     return `at ${plural('minute', values.length)} ${joinList(values.map(String))}`;
+  }
+  const items = mixedItems(field);
+  if (items) {
+    return `at minutes ${joinList(items)}`;
   }
   return joinList(
     field.parts.map((part) => {
@@ -75,6 +79,10 @@ function describeHours(field: CronField): string {
   const values = singleValues(field);
   if (values) {
     return `${plural('hour', values.length)} ${joinList(values.map(String))}`;
+  }
+  const items = mixedItems(field);
+  if (items) {
+    return `hours ${joinList(items)}`;
   }
   return joinList(field.parts.map((part) => describePart(part, 'hour', String)));
 }
@@ -98,6 +106,10 @@ function describeDaysOfMonth(field: CronField): string {
   const values = singleValues(field);
   if (values) {
     return `on ${plural('day', values.length)} ${joinList(values.map(String))} of the month`;
+  }
+  const items = mixedItems(field);
+  if (items) {
+    return `on days ${joinList(items)} of the month`;
   }
   return `on ${joinList(field.parts.map((part) => describePart(part, 'day', String)))} of the month`;
 }
@@ -156,6 +168,28 @@ function singleValues(field: CronField): number[] | undefined {
     return undefined;
   }
   return [...field.values];
+}
+
+/**
+ * The written items when the list mixes single values with plain (unstepped) ranges,
+ * e.g. `1,5-10` gives `['1', '5 through 10']`; otherwise `undefined`.
+ */
+function mixedItems(field: CronField): string[] | undefined {
+  const items: string[] = [];
+  let hasValue = false;
+  let hasRange = false;
+  for (const part of field.parts) {
+    if (part.kind === 'value') {
+      items.push(String(part.value));
+      hasValue = true;
+    } else if (part.kind === 'range' && part.step === 1) {
+      items.push(`${part.start} through ${part.end}`);
+      hasRange = true;
+    } else {
+      return undefined;
+    }
+  }
+  return hasValue && hasRange ? items : undefined;
 }
 
 function joinList(items: readonly string[]): string {
