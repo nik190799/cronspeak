@@ -1,0 +1,56 @@
+{
+  "agent_result": "success",
+  "agent_subtype": "success",
+  "apply_status": "ok",
+  "area_depth": 2,
+  "base_sha": "56c2a85c9a826f3a6ab4aaff98c5c31fcde3542f",
+  "classes": [
+    "guarded:test:modify"
+  ],
+  "completed_at": "2026-10-04T04:26:00Z",
+  "config_sha256": "e75fddde8fb51aaf54249ccdd91a6863bd1dfdbe3d93fdbe1841da3a84c50f4d",
+  "detector_version": "9c89829c1520af69bb4edcfd42675d986ca0a0cc666e3e931fe3c7fc46ae7c49",
+  "evidence": {
+    "failing_tests": [],
+    "files": [
+      {
+        "area": "src/describe",
+        "op": "M",
+        "path": "src/describe/describe.ts",
+        "source": true,
+        "test": false
+      },
+      {
+        "area": "test",
+        "op": "M",
+        "path": "test/describe.test.ts",
+        "source": false,
+        "test": true
+      }
+    ],
+    "guarded": [
+      {
+        "op": "modify",
+        "path": "test/describe.test.ts",
+        "root": "test"
+      }
+    ],
+    "import_edges": [],
+    "rule_hits": []
+  },
+  "gate_step": "none",
+  "issue": 1,
+  "lessons_cited": [],
+  "patch_bytes": 1451,
+  "patch_sha256": "84ef54a18b8282ad83ef18b943baf5b4a11183035ea3d1fa970f018d15a59b72",
+  "pr": 10,
+  "published": true,
+  "published_sha": "6187bfa0e9ce86c1d450613f716e98f6c7254c38",
+  "repo": "nik190799/cronspeak",
+  "ruleset_sha256": "84875d2439fd85c97cf51108cd33c64984715c49ef11820972a6631ff630dccb",
+  "run_attempt": 1,
+  "run_id": "37176876174",
+  "schema": "cadence.observation/1",
+  "truncated": false,
+  "verify_result": "success"
+}
