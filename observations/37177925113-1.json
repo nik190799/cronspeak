@@ -1,0 +1,63 @@
+{
+  "agent_result": "success",
+  "agent_subtype": "success",
+  "apply_status": "ok",
+  "area_depth": 2,
+  "base_sha": "3827b83c65701ad58dbea3398f6f02b3481c9d40",
+  "classes": [
+    "guarded:test:modify"
+  ],
+  "completed_at": "2026-10-04T04:49:29Z",
+  "config_sha256": "e75fddde8fb51aaf54249ccdd91a6863bd1dfdbe3d93fdbe1841da3a84c50f4d",
+  "detector_version": "9c89829c1520af69bb4edcfd42675d986ca0a0cc666e3e931fe3c7fc46ae7c49",
+  "evidence": {
+    "failing_tests": [],
+    "files": [
+      {
+        "area": ".",
+        "op": "M",
+        "path": "CHANGELOG.md",
+        "source": false,
+        "test": false
+      },
+      {
+        "area": "src/describe",
+        "op": "M",
+        "path": "src/describe/describe.ts",
+        "source": true,
+        "test": false
+      },
+      {
+        "area": "test",
+        "op": "M",
+        "path": "test/describe.test.ts",
+        "source": false,
+        "test": true
+      }
+    ],
+    "guarded": [
+      {
+        "op": "modify",
+        "path": "test/describe.test.ts",
+        "root": "test"
+      }
+    ],
+    "import_edges": [],
+    "rule_hits": []
+  },
+  "gate_step": "none",
+  "issue": 3,
+  "lessons_cited": [],
+  "patch_bytes": 4463,
+  "patch_sha256": "3ba739c93acfc8ae39bd9b9cc75da8e74e1553ed0930f8c23df7c0f3d551ebbf",
+  "pr": 12,
+  "published": true,
+  "published_sha": "66b3b8f55448566d33226a7b1708b9322212a4d5",
+  "repo": "nik190799/cronspeak",
+  "ruleset_sha256": "84875d2439fd85c97cf51108cd33c64984715c49ef11820972a6631ff630dccb",
+  "run_attempt": 1,
+  "run_id": "37177925113",
+  "schema": "cadence.observation/1",
+  "truncated": false,
+  "verify_result": "success"
+}
