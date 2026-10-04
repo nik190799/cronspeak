@@ -1,0 +1,15 @@
+{
+  "schema": "cadence.decision/1",
+  "pr": 14,
+  "merged": true,
+  "closed_at": "2026-10-04T04:57:06Z",
+  "plan_sha": "100cbbe332efb4f204df13f37f68e27cd00a4af185015684b6390cc255d537bf",
+  "transitions": [
+    {
+      "class_key": "guarded:test:modify",
+      "lesson_id": "L-9c6f6eb9",
+      "to": "pattern",
+      "landed": true
+    }
+  ]
+}

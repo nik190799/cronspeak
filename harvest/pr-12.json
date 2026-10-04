@@ -1,0 +1,13 @@
+{
+  "schema": "cadence.harvest/1",
+  "pr": 12,
+  "issue": 3,
+  "kind": "agent",
+  "final_head_sha": "66b3b8f55448566d33226a7b1708b9322212a4d5",
+  "merged": true,
+  "closed_at": "2026-10-04T04:55:29Z",
+  "harvested_at": "2026-10-04T10:38:09Z",
+  "edit_basis": "ancestry",
+  "findings": 1,
+  "status": "ok"
+}
