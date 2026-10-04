@@ -1,0 +1,34 @@
+{
+  "schema": "cadence.retro-plan/1",
+  "plan_sha": "980a1ba6c28e5b0a71a60cdd423c38d24ab89f4d589a4a3e2151e9547a128c07",
+  "base_sha": "3827b83c65701ad58dbea3398f6f02b3481c9d40",
+  "generated_at": "2026-10-04T04:50:35Z",
+  "mode": "on",
+  "applied": true,
+  "verify_required": false,
+  "transitions": [
+    {
+      "lesson_id": "L-9c6f6eb9",
+      "class_key": "guarded:test:modify",
+      "from": "note",
+      "to": "pattern",
+      "reason": "promote",
+      "issues": [
+        1,
+        3
+      ],
+      "occurrences": 2,
+      "evidence": [
+        "d24b683c-6427-5a02-818c-d56b36c407e0",
+        "0dc81158-deac-5b41-84fc-87635d4a5e82"
+      ],
+      "text": "Do not modify or delete existing files under `test/`; the gate restores them (seen in #1, #3).",
+      "sample": null,
+      "emit": null
+    }
+  ],
+  "skipped": [],
+  "needs_human": [],
+  "replay": [],
+  "metrics": null
+}
