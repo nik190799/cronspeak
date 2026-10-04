@@ -12,6 +12,14 @@ All notable changes to this project are documented here. The format follows
   values and plain ranges as one phrase, e.g. `1,5-10 9 * * *` now reads
   "At minutes 1 and 5 through 10 past hour 9".
 
+### Added
+
+- Day-of-week ranges may wrap through the end of the week: `FRI-MON` is
+  Friday, Saturday, Sunday and Monday, and `FRI-MON/2` is Friday and Sunday.
+  Reversed ranges in other fields still throw.
+- The `a/n` step shorthand, meaning `a-max/n` (`5/15` is minutes 5, 20, 35
+  and 50). For day-of-week it stops at Saturday, like `*`.
+
 ## [0.1.0] - 2026-10-03
 
 ### Added

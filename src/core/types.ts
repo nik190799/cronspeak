@@ -14,7 +14,9 @@ export const FIELD_ORDER: readonly FieldName[] = [
  *
  * - `all`: `*` or `*\/n`
  * - `value`: a single value such as `5` or `MON`
- * - `range`: `a-b` or `a-b/n`
+ * - `range`: `a-b`, `a-b/n`, or `a/n` (stored as `a-max/n`). For
+ *   day-of-week, `start` may be greater than `end` (`FRI-MON`): the range
+ *   wraps through the end of the week.
  *
  * `step` is always present and is `1` when no `/n` was written.
  * Values are stored as numbers; day-of-week 7 is kept as written here

@@ -46,7 +46,15 @@ Each field accepts:
 | `a,b,c` | a list (of any of these)            | `0,30 * * * *`    |
 | `*/n`   | every n-th value                    | `*/15 * * * *`    |
 | `a-b/n` | every n-th value in a range         | `0 8-18/2 * * *`  |
+| `a/n`   | every n-th value from a: `a-max/n`  | `5/15 * * * *`    |
+| `a-b`   | wrapping range (day-of-week only)   | `0 9 * * FRI-MON` |
 | names   | `JAN`-`DEC`, `SUN`-`SAT` (any case) | `0 9 * * MON-FRI` |
+
+A day-of-week range whose start is after its end wraps through the end of the week: `FRI-MON`
+is Friday, Saturday, Sunday and Monday, and `FRI-MON/2` is Friday and Sunday (the step counts from
+the start of the range). Only day-of-week ranges wrap: a reversed range in any other field, such
+as hour `17-9`, is an error. For day-of-week, `a/n` stops at Saturday (6), like `*`, so `1/2` is
+Monday, Wednesday and Friday.
 
 When **both** day-of-month and day-of-week are restricted (neither starts with `*`), a day
 matches if **either** field matches, as in standard cron. `0 9 13 * 5` runs at 09:00 on the

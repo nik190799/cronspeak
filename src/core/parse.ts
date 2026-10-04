@@ -88,7 +88,8 @@ function parsePart(item: string, spec: FieldSpec, fail: (message: string) => nev
   if (dash.length === 2) {
     const start = parseValue(dash[0] as string, spec, fail);
     const end = parseValue(dash[1] as string, spec, fail);
-    if (start > end) {
+    // Only day-of-week ranges may wrap through the end of the week (`FRI-MON`).
+    if (start > end && spec.name !== 'dayOfWeek') {
       return fail(`range start ${start} is greater than range end ${end} in "${item}"`);
     }
     return { kind: 'range', start, end, step };
@@ -99,11 +100,15 @@ function parsePart(item: string, spec: FieldSpec, fail: (message: string) => nev
 
   const value = parseValue(base, spec, fail);
   if (stepText !== undefined) {
-    return fail(
-      `a step needs "*" or a range before it, e.g. "*/${step}" or "${value}-${spec.max}/${step}"`,
-    );
+    // `a/n` is shorthand for `a-max/n`. Day-of-week `7/n` stays `7-7` rather than wrapping.
+    return { kind: 'range', start: value, end: Math.max(value, fieldEnd(spec)), step };
   }
   return { kind: 'value', value };
+}
+
+/** Where `*` and `a/n` stop: the field maximum, or 6 for day-of-week (7 only repeats Sunday). */
+function fieldEnd(spec: FieldSpec): number {
+  return spec.name === 'dayOfWeek' ? 6 : spec.max;
 }
 
 function parseValue(text: string, spec: FieldSpec, fail: (message: string) => never): number {
@@ -130,9 +135,16 @@ function expandPart(part: FieldPart, spec: FieldSpec): number[] {
     return [part.value];
   }
   const start = part.kind === 'all' ? spec.min : part.start;
-  // `*` for day-of-week covers 0-6; 7 would only duplicate Sunday.
-  const end = part.kind === 'all' ? (spec.name === 'dayOfWeek' ? 6 : spec.max) : part.end;
+  const end = part.kind === 'all' ? fieldEnd(spec) : part.end;
   const out: number[] = [];
+  if (start > end) {
+    // A wrapping day-of-week range: walk the week from `start`, counting the step across the wrap.
+    const days = (((end - start) % 7) + 7) % 7;
+    for (let offset = 0; offset <= days; offset += part.step) {
+      out.push((start + offset) % 7);
+    }
+    return out;
+  }
   for (let v = start; v <= end; v += part.step) {
     out.push(v);
   }
