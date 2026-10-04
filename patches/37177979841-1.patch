@@ -1,0 +1,217 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 5ecf300..12d42c5 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
+ 
+ ## [Unreleased]
+ 
++### Added
++
++- Day-of-week ranges may wrap through the end of the week: `FRI-MON` is
++  Friday, Saturday, Sunday and Monday, and `FRI-MON/2` is Friday and Sunday.
++  Reversed ranges in other fields still throw.
++- The `a/n` step shorthand, meaning `a-max/n` (`5/15` is minutes 5, 20, 35
++  and 50). For day-of-week it stops at Saturday, like `*`.
++
+ ## [0.1.0] - 2026-10-03
+ 
+ ### Added
+diff --git a/README.md b/README.md
+index b4731dd..969a304 100644
+--- a/README.md
++++ b/README.md
+@@ -46,8 +46,16 @@ Each field accepts:
+ | `a,b,c` | a list (of any of these)            | `0,30 * * * *`    |
+ | `*/n`   | every n-th value                    | `*/15 * * * *`    |
+ | `a-b/n` | every n-th value in a range         | `0 8-18/2 * * *`  |
++| `a/n`   | every n-th value from a: `a-max/n`  | `5/15 * * * *`    |
++| `a-b`   | wrapping range (day-of-week only)   | `0 9 * * FRI-MON` |
+ | names   | `JAN`-`DEC`, `SUN`-`SAT` (any case) | `0 9 * * MON-FRI` |
+ 
++A day-of-week range whose start is after its end wraps through the end of the week: `FRI-MON`
++is Friday, Saturday, Sunday and Monday, and `FRI-MON/2` is Friday and Sunday (the step counts from
++the start of the range). Only day-of-week ranges wrap: a reversed range in any other field, such
++as hour `17-9`, is an error. For day-of-week, `a/n` stops at Saturday (6), like `*`, so `1/2` is
++Monday, Wednesday and Friday.
++
+ When **both** day-of-month and day-of-week are restricted (neither starts with `*`), a day
+ matches if **either** field matches, as in standard cron. `0 9 13 * 5` runs at 09:00 on the
+ 13th of every month _and_ on every Friday.
+diff --git a/src/core/parse.ts b/src/core/parse.ts
+index 66a8a13..82fb699 100644
+--- a/src/core/parse.ts
++++ b/src/core/parse.ts
+@@ -88,7 +88,8 @@ function parsePart(item: string, spec: FieldSpec, fail: (message: string) => nev
+   if (dash.length === 2) {
+     const start = parseValue(dash[0] as string, spec, fail);
+     const end = parseValue(dash[1] as string, spec, fail);
+-    if (start > end) {
++    // Only day-of-week ranges may wrap through the end of the week (`FRI-MON`).
++    if (start > end && spec.name !== 'dayOfWeek') {
+       return fail(`range start ${start} is greater than range end ${end} in "${item}"`);
+     }
+     return { kind: 'range', start, end, step };
+@@ -99,13 +100,17 @@ function parsePart(item: string, spec: FieldSpec, fail: (message: string) => nev
+ 
+   const value = parseValue(base, spec, fail);
+   if (stepText !== undefined) {
+-    return fail(
+-      `a step needs "*" or a range before it, e.g. "*/${step}" or "${value}-${spec.max}/${step}"`,
+-    );
++    // `a/n` is shorthand for `a-max/n`. Day-of-week `7/n` stays `7-7` rather than wrapping.
++    return { kind: 'range', start: value, end: Math.max(value, fieldEnd(spec)), step };
+   }
+   return { kind: 'value', value };
+ }
+ 
++/** Where `*` and `a/n` stop: the field maximum, or 6 for day-of-week (7 only repeats Sunday). */
++function fieldEnd(spec: FieldSpec): number {
++  return spec.name === 'dayOfWeek' ? 6 : spec.max;
++}
++
+ function parseValue(text: string, spec: FieldSpec, fail: (message: string) => never): number {
+   if (text === '') {
+     return fail('missing value');
+@@ -130,9 +135,16 @@ function expandPart(part: FieldPart, spec: FieldSpec): number[] {
+     return [part.value];
+   }
+   const start = part.kind === 'all' ? spec.min : part.start;
+-  // `*` for day-of-week covers 0-6; 7 would only duplicate Sunday.
+-  const end = part.kind === 'all' ? (spec.name === 'dayOfWeek' ? 6 : spec.max) : part.end;
++  const end = part.kind === 'all' ? fieldEnd(spec) : part.end;
+   const out: number[] = [];
++  if (start > end) {
++    // A wrapping day-of-week range: walk the week from `start`, counting the step across the wrap.
++    const days = (((end - start) % 7) + 7) % 7;
++    for (let offset = 0; offset <= days; offset += part.step) {
++      out.push((start + offset) % 7);
++    }
++    return out;
++  }
+   for (let v = start; v <= end; v += part.step) {
+     out.push(v);
+   }
+diff --git a/src/core/types.ts b/src/core/types.ts
+index da45c4c..ae30cf5 100644
+--- a/src/core/types.ts
++++ b/src/core/types.ts
+@@ -14,7 +14,9 @@ export const FIELD_ORDER: readonly FieldName[] = [
+  *
+  * - `all`: `*` or `*\/n`
+  * - `value`: a single value such as `5` or `MON`
+- * - `range`: `a-b` or `a-b/n`
++ * - `range`: `a-b`, `a-b/n`, or `a/n` (stored as `a-max/n`). For
++ *   day-of-week, `start` may be greater than `end` (`FRI-MON`): the range
++ *   wraps through the end of the week.
+  *
+  * `step` is always present and is `1` when no `/n` was written.
+  * Values are stored as numbers; day-of-week 7 is kept as written here
+diff --git a/test/parse-wrap.test.ts b/test/parse-wrap.test.ts
+new file mode 100644
+index 0000000..89e73b9
+--- /dev/null
++++ b/test/parse-wrap.test.ts
+@@ -0,0 +1,102 @@
++import { describe as group, expect, it } from 'vitest';
++import { CronParseError, describe, nextRuns, parse } from '../src/index.js';
++
++const iso = (dates: Date[]): string[] => dates.map((d) => d.toISOString());
++
++group('wrap-around day-of-week ranges', () => {
++  it('wraps FRI-MON through the end of the week', () => {
++    expect(parse('0 0 * * FRI-MON').dayOfWeek.values).toEqual([0, 1, 5, 6]);
++  });
++
++  it('wraps numeric ranges the same way', () => {
++    expect(parse('0 0 * * 5-1').dayOfWeek.values).toEqual([0, 1, 5, 6]);
++  });
++
++  it('keeps the written range as a part', () => {
++    expect(parse('0 0 * * FRI-MON').dayOfWeek.parts).toEqual([
++      { kind: 'range', start: 5, end: 1, step: 1 },
++    ]);
++  });
++
++  it('counts a step from the range start across the wrap', () => {
++    expect(parse('0 0 * * FRI-MON/2').dayOfWeek.values).toEqual([0, 5]);
++    expect(parse('0 0 * * THU-TUE/3').dayOfWeek.values).toEqual([0, 4]);
++  });
++
++  it('handles SUN-SAT, SAT-SUN and wraps that include 7', () => {
++    expect(parse('0 0 * * SUN-SAT').dayOfWeek.values).toEqual([0, 1, 2, 3, 4, 5, 6]);
++    expect(parse('0 0 * * SAT-SUN').dayOfWeek.values).toEqual([0, 6]);
++    expect(parse('0 0 * * 7-2').dayOfWeek.values).toEqual([0, 1, 2]);
++    expect(parse('0 0 * * 6-0').dayOfWeek.values).toEqual([0, 6]);
++  });
++
++  it('still rejects reversed ranges in other fields', () => {
++    for (const expr of ['30-10 * * * *', '0 17-9 * * *', '0 0 20-10 * *', '0 0 * DEC-JAN *']) {
++      expect(() => parse(expr)).toThrow(/range start \d+ is greater than range end \d+/);
++    }
++  });
++
++  it('describes a wrapping range', () => {
++    expect(describe('0 9 * * FRI-MON')).toBe('At 09:00 on Friday through Monday');
++  });
++
++  it('only runs on Friday through Monday', () => {
++    // 2026-01-01 is a Thursday.
++    const from = new Date('2026-01-01T12:00:00Z');
++    const runs = nextRuns('0 9 * * FRI-MON', from, 6);
++    expect(iso(runs)).toEqual([
++      '2026-01-02T09:00:00.000Z',
++      '2026-01-03T09:00:00.000Z',
++      '2026-01-04T09:00:00.000Z',
++      '2026-01-05T09:00:00.000Z',
++      '2026-01-09T09:00:00.000Z',
++      '2026-01-10T09:00:00.000Z',
++    ]);
++    expect(new Set(runs.map((d) => d.getUTCDay()))).toEqual(new Set([5, 6, 0, 1]));
++  });
++});
++
++group('a/n step shorthand', () => {
++  it('treats a/n as a-max/n', () => {
++    expect(parse('5/15 * * * *').minute.values).toEqual([5, 20, 35, 50]);
++    expect(parse('5/15 * * * *').minute.parts).toEqual([
++      { kind: 'range', start: 5, end: 59, step: 15 },
++    ]);
++  });
++
++  it('works in every field', () => {
++    const cron = parse('5/15 8/6 10/10 3/4 1/2');
++    expect(cron.hour.values).toEqual([8, 14, 20]);
++    expect(cron.dayOfMonth.values).toEqual([10, 20, 30]);
++    expect(cron.month.values).toEqual([3, 7, 11]);
++    expect(cron.dayOfWeek.values).toEqual([1, 3, 5]);
++  });
++
++  it('accepts names before the step', () => {
++    expect(parse('0 0 1 FEB/3 *').month.values).toEqual([2, 5, 8, 11]);
++    expect(parse('0 0 * * WED/2').dayOfWeek.values).toEqual([3, 5]);
++  });
++
++  it('gives a single value when the step passes the end', () => {
++    expect(parse('50/30 * * * *').minute.values).toEqual([50]);
++    expect(parse('0 0 * * 7/1').dayOfWeek.values).toEqual([0]);
++  });
++
++  it('describes the shorthand as a range', () => {
++    expect(describe('5/15 * * * *')).toBe('Every 15 minutes from minute 5 through 59');
++  });
++
++  it('runs from the start value', () => {
++    const from = new Date('2026-01-01T10:00:00Z');
++    expect(iso(nextRuns('5/15 * * * *', from, 3))).toEqual([
++      '2026-01-01T10:05:00.000Z',
++      '2026-01-01T10:20:00.000Z',
++      '2026-01-01T10:35:00.000Z',
++    ]);
++  });
++
++  it('still validates the value and the step', () => {
++    expect(() => parse('60/5 * * * *')).toThrow(CronParseError);
++    expect(() => parse('5/0 * * * *')).toThrow(/step must be at least 1/);
++  });
++});

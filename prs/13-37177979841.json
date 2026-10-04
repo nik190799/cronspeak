@@ -1,0 +1,11 @@
+{
+  "schema": "cadence.pr/1",
+  "pr": 13,
+  "issue": 2,
+  "run_id": "37177979841",
+  "run_attempt": 1,
+  "base_sha": "558e79c42ce10e9c08e80671a85a313ba17938f5",
+  "published_sha": "6eb922a5e0d67f2762265dab638b79a598460ba1",
+  "patch_sha256": "4ed23c20784badfa3017d40ec311ee89fef95d415ca2a204b62f894324003f72",
+  "recorded_at": "2026-10-04T04:51:06Z"
+}

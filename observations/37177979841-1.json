@@ -1,0 +1,90 @@
+{
+  "agent_result": "success",
+  "agent_subtype": "success",
+  "apply_status": "ok",
+  "area_depth": 2,
+  "base_sha": "558e79c42ce10e9c08e80671a85a313ba17938f5",
+  "classes": [],
+  "completed_at": "2026-10-04T04:50:40Z",
+  "config_sha256": "e75fddde8fb51aaf54249ccdd91a6863bd1dfdbe3d93fdbe1841da3a84c50f4d",
+  "detector_version": "9c89829c1520af69bb4edcfd42675d986ca0a0cc666e3e931fe3c7fc46ae7c49",
+  "evidence": {
+    "failing_tests": [],
+    "files": [
+      {
+        "area": ".",
+        "op": "M",
+        "path": "CHANGELOG.md",
+        "source": false,
+        "test": false
+      },
+      {
+        "area": ".",
+        "op": "M",
+        "path": "README.md",
+        "source": false,
+        "test": false
+      },
+      {
+        "area": "src/core",
+        "op": "M",
+        "path": "src/core/parse.ts",
+        "source": true,
+        "test": false
+      },
+      {
+        "area": "src/core",
+        "op": "M",
+        "path": "src/core/types.ts",
+        "source": true,
+        "test": false
+      },
+      {
+        "area": "test",
+        "op": "A",
+        "path": "test/parse-wrap.test.ts",
+        "source": false,
+        "test": true
+      }
+    ],
+    "guarded": [],
+    "import_edges": [
+      {
+        "from_area": "test",
+        "key": "import-edge:test->pkg:vitest",
+        "kind": "package",
+        "line": "import { describe as group, expect, it } from 'vitest';",
+        "line_no": 1,
+        "line_sha256": "706cd57ea4c1d1e4565c74f8a548ae67f51405816952e69737ae78332db62b7c",
+        "path": "test/parse-wrap.test.ts",
+        "to": "pkg:vitest"
+      },
+      {
+        "from_area": "test",
+        "key": "import-edge:test->src",
+        "kind": "relative",
+        "line": "import { CronParseError, describe, nextRuns, parse } from '../src/index.js';",
+        "line_no": 2,
+        "line_sha256": "4eea6789b7e05dcfee9464e0cd53d03808b63dfa6cffae55e9844d64b8a93ba1",
+        "path": "test/parse-wrap.test.ts",
+        "to": "src"
+      }
+    ],
+    "rule_hits": []
+  },
+  "gate_step": "none",
+  "issue": 2,
+  "lessons_cited": [],
+  "patch_bytes": 8947,
+  "patch_sha256": "4ed23c20784badfa3017d40ec311ee89fef95d415ca2a204b62f894324003f72",
+  "pr": 13,
+  "published": true,
+  "published_sha": "6eb922a5e0d67f2762265dab638b79a598460ba1",
+  "repo": "nik190799/cronspeak",
+  "ruleset_sha256": "84875d2439fd85c97cf51108cd33c64984715c49ef11820972a6631ff630dccb",
+  "run_attempt": 1,
+  "run_id": "37177979841",
+  "schema": "cadence.observation/1",
+  "truncated": false,
+  "verify_result": "success"
+}
